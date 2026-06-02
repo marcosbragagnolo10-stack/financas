@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minhas Finanças</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --bg2: #1a1a1a;
+    --bg3: #242424;
+    --border: #2e2e2e;
+    --text: #f0f0f0;
+    --muted: #888;
+    --green: #22c55e;
+    --green-dim: #14532d22;
+    --red: #ef4444;
+    --red-dim: #7f1d1d22;
+    --blue: #3b82f6;
+    --blue-dim: #1e3a5f33;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* AUTH */
+  #authScreen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: var(--bg);
+  }
+  .auth-box {
+    width: 100%;
+    max-width: 380px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+  }
+  .auth-logo {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--green);
+    margin-bottom: 0.3rem;
+    letter-spacing: -1px;
+  }
+  .auth-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 2rem;
+  }
+  .auth-tabs {
+    display: flex;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+  .auth-tab {
+    flex: 1;
+    padding: 9px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .auth-tab.active { background: var(--bg3); color: var(--text); font-weight: 500; }
+  .auth-field { margin-bottom: 12px; }
+  .auth-field label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 5px; }
+  .auth-field input {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .auth-field input:focus { border-color: var(--green); }
+  .auth-btn {
+    width: 100%;
+    padding: 11px;
+    background: var(--green);
+    color: #000;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: opacity .2s;
+  }
+  .auth-btn:hover { opacity: .85; }
+  .auth-error { font-size: 12px; color: var(--red); margin-top: 10px; text-align: center; min-height: 18px; }
+
+  /* APP */
+  #appScreen { display: none; max-width: 480px; margin: auto; padding: 1rem; }
+
+  /* Header */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.2rem;
+    padding-top: 0.5rem;
+  }
+  .app-logo { font-size: 18px; font-weight: 600; color: var(--green); letter-spacing: -.5px; }
+  .user-info { font-size: 12px; color: var(--muted); text-align: right; }
+  .logout-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--muted);
+    font-size: 12px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    margin-top: 4px;
+    display: block;
+    transition: all .2s;
+  }
+  .logout-btn:hover { color: var(--red); border-color: var(--red); }
+
+  /* Month nav */
+  .month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    margin-bottom: 1rem;
+  }
+  .mnav-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .2s;
+  }
+  .mnav-btn:hover { color: var(--text); border-color: #555; }
+  .month-label { font-size: 15px; font-weight: 500; }
+
+  /* Cards */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+  .scard {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+  }
+  .scard.full { grid-column: 1 / -1; }
+  .scard-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
+  .scard-val { font-size: 22px; font-weight: 500; font-family: 'DM Mono', monospace; }
+  .scard-val.green { color: var(--green); }
+  .scard-val.red { color: var(--red); }
+  .scard-val.blue { color: var(--blue); }
+  .carry-note { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  /* Form */
+  .form-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  .form-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .form-select, .form-input {
+    padding: 9px 11px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s;
+    width: 100%;
+  }
+  .form-select:focus, .form-input:focus { border-color: var(--green); }
+  .form-select { flex: 0 0 130px; width: 130px; }
+  .add-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--green);
+    color: #000;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .add-btn:hover { opacity: .85; }
+  .add-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* List */
+  .section-title { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    transition: border-color .2s;
+  }
+  .item:hover { border-color: #3e3e3e; }
+  .item-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .item-icon.in { background: var(--green-dim); color: var(--green); }
+  .item-icon.out { background: var(--red-dim); color: var(--red); }
+  .item-info { flex: 1; min-width: 0; }
+  .item-desc { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-date { font-size: 11px; color: var(--muted); margin-top: 1px; font-family: 'DM Mono', monospace; }
+  .item-amount { font-size: 14px; font-weight: 500; font-family: 'DM Mono', monospace; white-space: nowrap; }
+  .item-amount.in { color: var(--green); }
+  .item-amount.out { color: var(--red); }
+  .del-btn {
+    background: none;
+    border: none;
+    color: var(--border);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color .2s;
+    line-height: 1;
+  }
+  .del-btn:hover { color: var(--red); }
+  .empty { text-align: center; padding: 2rem 0; color: var(--muted); font-size: 14px; }
+  .loading-txt { text-align: center; padding: 2rem; color: var(--muted); font-size: 14px; }
+
+  /* Spinner */
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid #0005;
+    border-top-color: #000;
+    border-radius: 50%;
+    animation: spin .6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- ===== TELA DE LOGIN ===== -->
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">💰 Minhas Finanças</div>
+    <div class="auth-sub">Controle financeiro pessoal</div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Entrar</button>
+      <button class="auth-tab" id="tabReg" onclick="switchTab('register')">Criar conta</button>
+    </div>
+
+    <div id="loginForm">
+      <div class="auth-field">
+        <label>E-mail</label>
+        <input type="email" id="loginEmail" placeholder="seu@email.com">
+      </div>
+      <div class="auth-field">
+        <label>Senha</label>
+        <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="auth-btn" onclick="doLogin()" id="btnLogin">Entrar</button>
+    </div>
+
+    <div id="registerForm" style="display:none">
+      <div class="auth-field">
+        <label>Nome</label>
+        <input type="text" id="regName" placeholder="Seu nome">
+      </div>
+      <div class="auth-field">
+        <label>E-mail</label>
+        <input type="email" id="regEmail" placeholder="seu@email.com">
+      </div>
+      <div class="auth-field">
+        <label>Senha (mínimo 6 caracteres)</label>
+        <input type="password" id="regPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doRegister()">
+      </div>
+      <button class="auth-btn" onclick="doRegister()" id="btnReg">Criar conta</button>
+    </div>
+
+    <div class="auth-error" id="authError"></div>
+  </div>
+</div>
+
+<!-- ===== TELA DO APP ===== -->
+<div id="appScreen">
+  <div class="top-bar">
+    <div class="app-logo">💰 Finanças</div>
+    <div class="user-info">
+      <span id="userEmail"></span>
+      <button class="logout-btn" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="month-nav">
+    <button class="mnav-btn" onclick="prevMonth()">&#8249;</button>
+    <span class="month-label" id="monthLabel"></span>
+    <button class="mnav-btn" onclick="nextMonth()">&#8250;</button>
+  </div>
+
+  <div class="summary-grid">
+    <div class="scard">
+      <div class="scard-label">▲ Entradas</div>
+      <div class="scard-val green" id="sumIn">R$ 0,00</div>
+    </div>
+    <div class="scard">
+      <div class="scard-label">▼ Saídas</div>
+      <div class="scard-val red" id="sumOut">R$ 0,00</div>
+    </div>
+    <div class="scard full">
+      <div class="scard-label">◆ Saldo do mês</div>
+      <div class="scard-val blue" id="sumBal">R$ 0,00</div>
+      <div class="carry-note" id="carryNote"></div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="form-row">
+      <select class="form-select" id="fType">
+        <option value="in">Entrada</option>
+        <option value="out">Saída</option>
+      </select>
+      <input class="form-input" type="number" id="fVal" placeholder="Valor (R$)" min="0" step="0.01">
+    </div>
+    <div style="margin-bottom:8px">
+      <input class="form-input" type="text" id="fDesc" placeholder="Descrição (ex: Salário, Aluguel...)">
+    </div>
+    <div style="margin-bottom:10px">
+      <input class="form-input" type="date" id="fDate">
+    </div>
+    <button class="add-btn" id="addBtn" onclick="addItem()">
+      <span id="addBtnTxt">+ Adicionar lançamento</span>
+    </button>
+  </div>
+
+  <div class="section-title">Lançamentos do mês</div>
+  <div id="list"><div class="loading-txt">Carregando...</div></div>
+</div>
+
+<!-- Firebase SDKs -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, query, where, onSnapshot, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// =====================================================
+// 🔧 COLE AQUI SUA CONFIGURAÇÃO DO FIREBASE
+// =====================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyCst2DWxmFbmu8q0kUvl_mN3aEHWG-od-0",
+  authDomain: "controle-financeiro-5f3f1.firebaseapp.com",
+  projectId: "controle-financeiro-5f3f1",
+  storageBucket: "controle-financeiro-5f3f1.firebasestorage.app",
+  messagingSenderId: "1085718319997",
+  appId: "1:1085718319997:web:4565b9681f676af21a3214"
+};
+// =====================================================
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+let cur = { y: new Date().getFullYear(), m: new Date().getMonth() };
+let uid = null;
+let unsubscribe = null;
+
+// --- Erros em PT ---
+function ptError(code) {
+  const map = {
+    'auth/invalid-email': 'E-mail inválido.',
+    'auth/user-not-found': 'Usuário não encontrado.',
+    'auth/wrong-password': 'Senha incorreta.',
+    'auth/email-already-in-use': 'E-mail já cadastrado.',
+    'auth/weak-password': 'Senha fraca. Use pelo menos 6 caracteres.',
+    'auth/invalid-credential': 'E-mail ou senha incorretos.',
+    'auth/network-request-failed': 'Erro de conexão. Verifique sua internet.',
+  };
+  return map[code] || 'Erro: ' + code;
+}
+
+// --- Auth ---
+window.switchTab = (tab) => {
+  document.getElementById('authError').textContent = '';
+  if (tab === 'login') {
+    document.getElementById('loginForm').style.display = '';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('tabLogin').classList.add('active');
+    document.getElementById('tabReg').classList.remove('active');
+  } else {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = '';
+    document.getElementById('tabLogin').classList.remove('active');
+    document.getElementById('tabReg').classList.add('active');
+  }
+};
+
+window.doLogin = async () => {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const btn = document.getElementById('btnLogin');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    document.getElementById('authError').textContent = ptError(e.code);
+  }
+  btn.disabled = false; btn.textContent = 'Entrar';
+};
+
+window.doRegister = async () => {
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass = document.getElementById('regPass').value;
+  const btn = document.getElementById('btnReg');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  try {
+    await createUserWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    document.getElementById('authError').textContent = ptError(e.code);
+  }
+  btn.disabled = false; btn.textContent = 'Criar conta';
+};
+
+window.doLogout = async () => {
+  if (unsubscribe) unsubscribe();
+  await signOut(auth);
+};
+
+// --- Auth state ---
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    uid = user.uid;
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('appScreen').style.display = 'block';
+    document.getElementById('userEmail').textContent = user.email;
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('fDate').value = today;
+    loadMonth();
+  } else {
+    uid = null;
+    if (unsubscribe) unsubscribe();
+    document.getElementById('authScreen').style.display = 'flex';
+    document.getElementById('appScreen').style.display = 'none';
+  }
+});
+
+// --- Month nav ---
+window.prevMonth = () => { cur.m--; if(cur.m<0){cur.m=11;cur.y--;} loadMonth(); };
+window.nextMonth = () => { cur.m++; if(cur.m>11){cur.m=0;cur.y++;} loadMonth(); };
+
+// --- Load month with realtime ---
+function loadMonth() {
+  if (!uid) return;
+  document.getElementById('monthLabel').textContent = MONTHS[cur.m] + ' ' + cur.y;
+  document.getElementById('list').innerHTML = '<div class="loading-txt">Carregando...</div>';
+
+  if (unsubscribe) unsubscribe();
+
+  const monthStr = `${cur.y}-${String(cur.m+1).padStart(2,'0')}`;
+  const q = query(
+    collection(db, 'transactions'),
+    where('uid', '==', uid),
+    where('month', '==', monthStr)
+  );
+
+  unsubscribe = onSnapshot(q, async (snap) => {
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const carry = await getCarryover();
+    renderApp(items, carry);
+  });
+}
+
+// --- Carryover: soma todos os meses anteriores ---
+async function getCarryover() {
+  if (!uid) return 0;
+  const q = query(
+    collection(db, 'transactions'),
+    where('uid', '==', uid)
+  );
+  const snap = await getDocs(q);
+  const curMonthStr = `${cur.y}-${String(cur.m+1).padStart(2,'0')}`;
+  let total = 0;
+  snap.docs.forEach(d => {
+    const data = d.data();
+    if (data.month < curMonthStr) {
+      total += data.type === 'in' ? data.val : -data.val;
+    }
+  });
+  return total;
+}
+
+// --- Render ---
+function fmt(v) {
+  return 'R$ ' + Math.abs(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function renderApp(items, carry) {
+  const totalIn = items.filter(x=>x.type==='in').reduce((a,x)=>a+x.val, 0);
+  const totalOut = items.filter(x=>x.type==='out').reduce((a,x)=>a+x.val, 0);
+  const bal = carry + totalIn - totalOut;
+
+  document.getElementById('sumIn').textContent = fmt(totalIn);
+  document.getElementById('sumOut').textContent = fmt(totalOut);
+  const balEl = document.getElementById('sumBal');
+  balEl.textContent = (bal < 0 ? '-' : '') + fmt(bal);
+  balEl.className = 'scard-val ' + (bal < 0 ? 'red' : bal > 0 ? 'blue' : '');
+
+  const note = document.getElementById('carryNote');
+  if (carry !== 0) {
+    note.textContent = (carry >= 0 ? '+ ' : '- ') + fmt(carry) + ' vindo do mês anterior';
+  } else {
+    note.textContent = '';
+  }
+
+  const list = document.getElementById('list');
+  if (!items.length) {
+    list.innerHTML = '<div class="empty">Nenhum lançamento neste mês</div>';
+    return;
+  }
+
+  const sorted = [...items].sort((a,b) => b.date.localeCompare(a.date));
+  list.innerHTML = sorted.map(it => `
+    <div class="item">
+      <div class="item-icon ${it.type}">${it.type==='in'?'↓':'↑'}</div>
+      <div class="item-info">
+        <div class="item-desc">${it.desc || 'Sem descrição'}</div>
+        <div class="item-date">${it.date.split('-').reverse().join('/')}</div>
+      </div>
+      <div class="item-amount ${it.type}">${it.type==='in'?'+':'-'}${fmt(it.val)}</div>
+      <button class="del-btn" data-id="${it.id}" title="Remover">✕</button>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.del-btn').forEach(btn => {
+    btn.onclick = () => deleteDoc(doc(db, 'transactions', btn.dataset.id));
+  });
+}
+
+// --- Add item ---
+window.addItem = async () => {
+  const val = parseFloat(document.getElementById('fVal').value);
+  const desc = document.getElementById('fDesc').value.trim();
+  const type = document.getElementById('fType').value;
+  const date = document.getElementById('fDate').value;
+  if (!val || val <= 0 || !date) return;
+
+  const btn = document.getElementById('addBtn');
+  btn.disabled = true;
+  document.getElementById('addBtnTxt').innerHTML = '<span class="spinner"></span>';
+
+  const monthStr = date.slice(0,7);
+  await addDoc(collection(db, 'transactions'), { uid, type, val, desc, date, month: monthStr });
+
+  document.getElementById('fVal').value = '';
+  document.getElementById('fDesc').value = '';
+  btn.disabled = false;
+  document.getElementById('addBtnTxt').textContent = '+ Adicionar lançamento';
+
+  // Se lançou num mês diferente do visualizado, muda para aquele mês
+  const [y, m] = date.split('-').map(Number);
+  if (y !== cur.y || m-1 !== cur.m) { cur.y = y; cur.m = m-1; loadMonth(); }
+};
+</script>
+</body>
+</html>
